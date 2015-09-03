@@ -1,0 +1,32 @@
+<!--
+@license
+Copyright (c) 2015 Tux Authors
+This code is distributed under the MIT license.  See LICENSE.txt for
+details.
+
+@description a set of elements that encapsulate the excellent dragula.js
+@group elements
+@dependency dragula dragula.js
+@dependency tux-draggable trustifier/tux-draggable.html
+@dependency tux-drop-zone trustifier/tux-drop-zone.html
+
+@demo
+-->
+<script src='bower_components/dragula.js/dist/dragula.js'></script>
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="tux-draggable.html">
+<link rel="import" href="tux-drop-zone.html">
+
+<dom-module id='drake'>
+  <script>
+    Polymer({
+      is: 'drake'
+      created: function() {
+        this._drake = dragula({
+          isContainer: function() {
+          }
+        });
+      }
+    });
+  </script>
+</dom-module>

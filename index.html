@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <script src='bower_components/webcomponentsjs/webcomponentsjs-lite.min.js'></script>
+  <link rel="import" href='bower_components/polymer/polymer.html'>
+  <link rel="import" href="tux-dragula.html">
+</head>
+<body unresolved>
+  <template is="dom-bind">
+    <tux-draggable id='A'>
+      <h1>You can drag me</h1>
+    </tux-draggable>
+    <tux-draggable id='B'>
+      <h1>You can drag me too</h1>
+    </tux-draggable>
+    <tux-drop-zone accepts="{{acceptables}}" lights-up>
+    </tux-drop-zone>
+    <tux-drop-zone>
+    </tux-drop-zone>
+  </template>
+  <script>
+  var acceptables = [ '#A', '#B' ];
+  </script>
+</body>
+</html>

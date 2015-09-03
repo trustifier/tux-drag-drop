@@ -1,0 +1,33 @@
+{
+  "name": "tux-dragula",
+  "version": "0.0.0",
+  "authors": [
+    "Ahmed Masud <ahmed.masud@trustifier.com>"
+  ],
+  "description": "Dragula drag-and-drop scaffolding",
+  "main": "tux-dragula.html",
+  "moduleType": [
+    "es6",
+    "globals"
+  ],
+  "keywords": [
+    "web-components",
+    "web-component",
+    "dragula",
+    "drag-and-drop"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/trustifier/tux-dragula",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "src"
+  ],
+  "dependencies": {
+    "dragula.js": "dragula#^3.1.0",
+    "polymer": "^1.1.2"
+  }
+}
