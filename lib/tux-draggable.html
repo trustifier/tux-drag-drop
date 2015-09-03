@@ -4,24 +4,87 @@ Copyright (c) 2015 Tux Authors
 This code is distributed under the MIT license.  See LICENSE.txt for
 details.
 -->
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../tux/tux.html">
+<link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="tux-draggable-behavior.html">
+<dom-module id='tux-drag-drop-container'>
+  <template>
+    <style>
+    #dropzone {
+      display: flex;
+      border: 1px dotted rgb(200, 200, 200);
+      padding: 10px;
+      min-width: 300px;
+      min-height: 300px;
+      background-color: rgba(0, 0,0, 0.1);
+      box-sizing: border-box;
+    }
+    </style>
+      <div id='dropzone' zones='{{zones}}'>
+          <content></content>
+      </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'tux-drag-drop-container',
+      properties: {
+        drake: {
+          type: String,
+          notify: true,
+          value: null
+        },
+        zones: {
+          type: String,
+          notify: true,
+          value: null
+        }
+      },
+      ready: function() {
+        if(this.drake === null){
+          throw new Error('<tux-drag-drop-container> without a corrosponding drake');
+        }
+      },
+      attached: function() {
+        this.register();
+      },
+      detached: function() {
+        this.unregister();
+      },
+      register: function() {
+        this.drake.split('|').forEach(function(drakeId) {
+          var drakeInstance = document.querySelector('#' + drakeId);
+          if(drakeInstance) {
+            drakeInstance.register(this.$.dropzone);
+          }
+        }, this);
+      },
+      unregister: function() {
+        var drake = document.querySelector('#' + this.drake);
+        drake.unregister(this.$.dropzone);
+      }
+    });
+  </script>
+</dom-module>
+
 <dom-module id="tux-draggable">
   <template>
-    <h1>a draggable element</h1>
-    <content></content>
+    <style>
+    #draggable {
+      cursor: grab;
+      cursor: -moz-grab;
+      cursor: -webkit-grab;
+    }
+    </style>
+    <div id='draggable'>
+      <content></content>
+    </div>
   </template>
   <script>
   (function() {
     // initialize anything common to all instances here
     // like static variables.
     Polymer({
-      is: "tux-dragula"
-      // implement the core behavior for this element in
-      // tux-dragula-behavior.html
-      behaviors: [ Tux.TuxDragula ]
-
+      is: "tux-draggable",
+      behaviors: [ Tux.DraggableBehavior ]
     });
   })();
   </script>

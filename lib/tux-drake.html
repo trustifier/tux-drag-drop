@@ -12,20 +12,70 @@ details.
 
 @demo
 -->
-<script src='bower_components/dragula.js/dist/dragula.js'></script>
-<link rel="import" href="bower_components/polymer/polymer.html">
-<link rel="import" href="tux-draggable.html">
-<link rel="import" href="tux-drop-zone.html">
+<script src='/bower_components/dragula.js/dist/dragula.js'></script>
+<link rel="import" href="/bower_components/polymer/polymer.html">
 
-<dom-module id='drake'>
+<dom-module id='tux-drake'>
+  <template>
+  </template>
   <script>
     Polymer({
-      is: 'drake'
+      is: 'tux-drake',
+      properties: {
+      },
+
+      _drake: null,
+
       created: function() {
         this._drake = dragula({
-          isContainer: function() {
+          invalid: function(el, target) {
+            if(el.hasAttribute('not-draggable')) {
+              return true;
+            }
+            return false;
+          },
+          accepts: function(el, target, source, sibling) {
+            if(!el.zones && el.hasAttribute('zones')) {
+              el.zones = el.getAttribute('zones');
+            }
+            if ( !target.zones || !(source.zones || el.zones)) {
+               // we can add strict zoning here later
+               // by looking for an extra flag like strict-zones
+               // on the element or source, in which case
+               // this would become false
+              return true;
+            }
+
+            var szA = (el.zones ? el.zones : source.zones).split(/[,|\s]+/);
+            var tzA = target.zones.split(/[,|\s]+/);
+            console.log(szA, tzA);
+            return szA.some(function(m) {
+              return (tzA.indexOf(m) !== -1);
+            });
           }
         });
+        this._drake.on('drag', this.dragging);
+        this._drake.on('drop', this.dropped);
+      },
+      dragging: function(el, source) {
+      },
+      dropped: function() {
+
+      },
+      register: function(el) {
+        this.async(function() {
+          if(this._drake.containers.indexOf(el) < 0 ) {
+            console.log('registered ', el, ' with ', this.id);
+            this._drake.containers.push(el);
+          }
+        });
+      },
+      unregister: function(el) {
+        var idx = this._drake.containers.indexOf(el);
+        if(idx >= 0) {
+          console.log('unregistered ', el);
+          this._drake.containers.splice(idx, 1);
+        }
       }
     });
   </script>

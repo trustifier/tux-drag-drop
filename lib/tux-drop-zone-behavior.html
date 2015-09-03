@@ -1,20 +1,12 @@
-<link rel="import" href="../polymer/polymer.html"></script>
-<link rel="import" href="../expandjs/expand.js"></script>
+<link rel="import" href="/bower_components/polymer/polymer.html"></script>
 <script>
   window.Tux = (window.Tux || {});
 
-  Tux.DraggableBehaviorImpl =  {
+  Tux.DropZoneBehaviorImpl =  {
     properties: {
-      acceptables: {
-        type: Array,
-        notify: true,
-        value: function() {
-          return [ '*' ];
-        }
-      }
     }
   };
 
   /* @polymerBehavior */
-  Tux.DraggableBehavior = Tux.DraggableBehaviorImpl;
+  Tux.DropZoneBehavior = Tux.DropZoneBehaviorImpl;
 </script>
