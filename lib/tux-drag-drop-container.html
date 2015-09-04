@@ -5,25 +5,27 @@ This code is distributed under the MIT license.  See LICENSE.txt for
 details.
 -->
 <link rel="import" href="/bower_components/polymer/polymer.html">
-<link rel="import" href="tux-draggable-behavior.html">
 <dom-module id='tux-drag-drop-container'>
   <template>
     <style>
-    #dropzone {
-      display: flex;
+    #wrapper {
       border: 1px dotted rgb(200, 200, 200);
       padding: 10px;
-      min-width: 300px;
-      min-height: 300px;
-      background-color: rgba(0, 0,0, 0.1);
       box-sizing: border-box;
     }
     </style>
-      <div id='dropzone' zones='{{zones}}'>
-          <content></content>
-      </div>
+    <div id='wrapper' class='tux-drag-drop-container-wrapper'>
+      <content></content>
+    </div>
   </template>
   <script>
+    /**
+    * rewraps content contents of an element into a
+    * new element
+    * old {element} The element to rewrap
+    * new {string} Name of the new tag to replace  old with
+    * returns the new element
+    */
     Polymer({
       is: 'tux-drag-drop-container',
       properties: {
@@ -32,16 +34,34 @@ details.
           notify: true,
           value: null
         },
+        dropZone: {
+          type: String,
+          notify: true,
+          value: null
+        },
         zones: {
           type: String,
           notify: true,
           value: null
-        }
+        },
+        wrapper: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+          value: 'div',
+        },
       },
+
+
+      isReady: false,
+
       ready: function() {
         if(this.drake === null){
           throw new Error('<tux-drag-drop-container> without a corrosponding drake');
         }
+        this.async(function() {
+          this.isReady = true;
+        });
       },
       attached: function() {
         this.register();
@@ -50,42 +70,17 @@ details.
         this.unregister();
       },
       register: function() {
-        this.drake.split('|').forEach(function(drakeId) {
-          var drakeInstance = document.querySelector('#' + drakeId);
+        this.drake.split(/[,|\s]+/).forEach(function(drakeId) {
+          var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
-            drakeInstance.register(this.$.dropzone);
+            drakeInstance.register(this.querySelector(this.dropZone ? this.dropZone : '.tux-drag-drop-container'));
           }
         }, this);
       },
       unregister: function() {
-        var drake = document.querySelector('#' + this.drake);
-        drake.unregister(this.$.dropzone);
+        var drake = document.querySelector(this.drake);
+        drake.unregister(this.querySelector(this.dropZone ? this.dropZone : '.tux-drag-drop-container'));
       }
     });
-  </script>
-</dom-module>
-
-<dom-module id="tux-draggable">
-  <template>
-    <style>
-    #draggable {
-      cursor: grab;
-      cursor: -moz-grab;
-      cursor: -webkit-grab;
-    }
-    </style>
-    <div id='draggable'>
-      <content></content>
-    </div>
-  </template>
-  <script>
-  (function() {
-    // initialize anything common to all instances here
-    // like static variables.
-    Polymer({
-      is: "tux-draggable",
-      behaviors: [ Tux.DraggableBehavior ]
-    });
-  })();
   </script>
 </dom-module>

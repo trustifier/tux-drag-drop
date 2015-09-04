@@ -1,10 +1,11 @@
 <!doctype html>
 <html>
 <head>
-  <link rel='stylesheet' href='bower_components/dragula.js/dist/dragula.css' type='text/css'>
-  <script src='bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
+  <link rel='stylesheet' href='/bower_components/dragula.js/dist/dragula.css' type='text/css'>
+  <script src='/bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
   <link rel="import" href='bower_components/polymer/polymer.html'>
-  <link rel="import" href="tux-dragula.html">
+  <link rel="import" href="lib/tux-drake.html">
+  <link rel="import" href="lib/tux-drag-drop-container.html">
 </head>
 <body unresolved>
   <template is="dom-bind">
@@ -12,32 +13,39 @@
       .wrapper {
         display: flex;
       }
+      #myDropZone {
+        min-height: 200px;
+        min-width: 200px;
+        background: #CCC;
+        border-radius: 8px;
+      }
     </style>
     <tux-drake id='foo'></tux-drake>
     <tux-drake id='bar'></tux-drake>
     <div class='wrapper'>
-      <tux-drag-drop-container drake='foo' id='A'>
-        <h1>You can drag me to a foo drop</h1>
+      <tux-drag-drop-container drake='#foo' id='A' drop-zone='#myDropZone'>
+        <p>A Static Item</p>
+        <div id='myDropZone'>
+          <p>You can drag me to a foo drop</p>
+          <p>and I love a foo drop too</p>
+        </div>
       </tux-drag-drop-container>
-      <tux-drag-drop-container drake='foo' id='B'>
+      <tux-drag-drop-container drake='#foo' id='B'>
         <h1>You can drag me to a foo drop 2 </h1>
       </tux-drag-drop-container>
     </div>
     <hr>
     <div class='wrapper'>
-      <tux-drag-drop-container drake='bar' zones='1' id='C'>
+      <tux-drag-drop-container drake='#bar' zones='1' id='C'>
         <h1>You can drag me to a bar drop in zone 1</h1>
       </tux-drag-drop-container>
-      <tux-drag-drop-container drake='bar' zones='1,2' id='C'>
+      <tux-drag-drop-container drake='#bar' zones='1,2' id='C'>
         <h1>You can drag me to a bar drop in zone 1 or 2</h1>
       </tux-drag-drop-container>
-      <tux-drag-drop-container drake='bar' zones='2' id='D'>
+      <tux-drag-drop-container drake='#bar' zones='2' id='D'>
         <h1 zones='2'>You can drag me to a bar drop 2</h1>
       </tux-drag-drop-container>
     </div>
   </template>
-  <script>
-  var acceptables = [ '#A', '#B' ];
-  </script>
 </body>
 </html>
