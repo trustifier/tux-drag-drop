@@ -1,8 +1,8 @@
 {
-  "name": "tux-dragula",
+  "name": "tux-drag-drop",
   "version": "1.0.0",
   "description": "Polymer scaffolding for dragula drag-and-drop javascript library",
-  "main": "tux-dragula.html",
+  "main": "tux-drag-drop.html",
   "dependencies": {},
   "devDependencies": {
     "del": "^2.0.0",
@@ -36,7 +36,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ahmed-masud/tux-dragula.git"
+    "url": "git+https://github.com/ahmed-masud/tux-drag-drop.git"
   },
   "keywords": [
     "webcomponents",
@@ -49,7 +49,7 @@
   "author": "Ahmed Masud <ahmed.masud@trustifier.com> (https://trustifier.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ahmed-masud/tux-dragula/issues"
+    "url": "https://github.com/ahmed-masud/tux-drag-drop/issues"
   },
-  "homepage": "https://github.com/ahmed-masud/tux-dragula#readme"
+  "homepage": "https://github.com/ahmed-masud/tux-drag-drop#readme"
 }
