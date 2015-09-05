@@ -34,7 +34,7 @@ details.
           notify: true,
           value: null
         },
-        dropZone: {
+        for: {
           type: String,
           notify: true,
           value: null
@@ -73,13 +73,13 @@ details.
         this.drake.split(/[,|\s]+/).forEach(function(drakeId) {
           var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
-            drakeInstance.register(this.querySelector(this.dropZone ? this.dropZone : '.tux-drag-drop-container'));
+            drakeInstance.register(this.querySelector(this.for ? this.for : '.tux-drag-drop-container'));
           }
         }, this);
       },
       unregister: function() {
         var drake = document.querySelector(this.drake);
-        drake.unregister(this.querySelector(this.dropZone ? this.dropZone : '.tux-drag-drop-container'));
+        drake.unregister(this.querySelector(this.for ? this.for : '.tux-drag-drop-container'));
       }
     });
   </script>
