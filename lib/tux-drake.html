@@ -24,6 +24,7 @@ details.
       _drake: null,
 
       created: function() {
+        var self = this;
         this._drake = dragula({
           invalid: function(el, target) {
             if(el.hasAttribute('not-draggable')) {
@@ -32,9 +33,12 @@ details.
             return false;
           },
           accepts: function(el, target, source, sibling) {
-            if(!el.zones && el.hasAttribute('zones')) {
-              el.zones = el.getAttribute('zones');
-            }
+            [el, target, source].forEach(function(f) {
+              f.zones = (!f.zones && f.hasAttribute('zones'))
+                ? f.getAttribute('zones')
+                : f.zones;
+            });
+
             if ( !target.zones || !(source.zones || el.zones)) {
                // we can add strict zoning here later
                // by looking for an extra flag like strict-zones
@@ -45,7 +49,6 @@ details.
 
             var szA = (el.zones ? el.zones : source.zones).split(/[,|\s]+/);
             var tzA = target.zones.split(/[,|\s]+/);
-            console.log(szA, tzA);
             return szA.some(function(m) {
               return (tzA.indexOf(m) !== -1);
             });
@@ -53,11 +56,37 @@ details.
         });
         this._drake.on('drag', this.dragging);
         this._drake.on('drop', this.dropped);
+        this._drake.on('dragend', this.dragEnd);
+        this._drake.on('cancel', this.dragCancel);
       },
-      dragging: function(el, source) {
-      },
-      dropped: function() {
 
+      /**
+       * @param {Element} elements that we want to attach to
+       */
+      dragging: function(el, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag', { 'drake': this, 'element': el, 'source': source });
+        source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+        source.fire('drag', { 'drake': this, 'element': el, 'source': source });
+      },
+
+      dropped: function(el, target, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+        source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+        source.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+        target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
+        target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+      },
+      dragEnd: function(el) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag-ended', { 'drake': this });
+      },
+      dragCancel: function(el, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag-canceled', { 'drake': this,'element': el,  'source': source });
+        source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+        source.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
       },
       register: function(el) {
         this.async(function() {

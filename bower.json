@@ -1,6 +1,6 @@
 {
   "name": "tux-drag-drop",
-  "version": "1.0.4",
+  "version": "1.0.9",
   "authors": [
     "Ahmed Masud <ahmed.masud@trustifier.com>"
   ],
@@ -32,5 +32,9 @@
   "dependencies": {
     "dragula.js": "dragula#^3.1.0",
     "polymer": "^1.1.2"
+  },
+  "devDependencies": {
+    "mat-elements": "ExpandJS/mat-elements#~0.9.8",
+    "xp-elements": "ExpandJS/xp-elements#~0.9.8"
   }
 }

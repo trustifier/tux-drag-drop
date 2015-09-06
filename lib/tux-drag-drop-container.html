@@ -9,12 +9,12 @@ details.
   <template>
     <style>
     #wrapper {
-      border: 1px dotted rgb(200, 200, 200);
-      padding: 10px;
+      border: none;
+      padding: 0px;
       box-sizing: border-box;
     }
     </style>
-    <div id='wrapper' class='tux-drag-drop-container-wrapper'>
+    <div id='wrapper' class='tux-drag-drop-container-wrapper' zones='[[zones]]'>
       <content></content>
     </div>
   </template>
@@ -49,11 +49,25 @@ details.
           notify: true,
           reflectToAttribute: true,
           value: 'div',
-        },
+        }
       },
 
+      observers: [ '_zonesChange(zones, for)' ],
 
       isReady: false,
+
+      _zonesChange: function (z, f) {
+        var target = this.querySelector(this.for ? this.for :
+          '.tux-drag-drop-container');
+        if (this.zones)
+          target.zones = this.zones;
+        if (this.drake)  {
+          var drakeInstance = document.querySelector(this.drake);
+          if(drakeInstance) {
+            drakeInstance.register(target);
+          }
+        }
+      },
 
       ready: function() {
         if(this.drake === null){
@@ -73,7 +87,9 @@ details.
         this.drake.split(/[,|\s]+/).forEach(function(drakeId) {
           var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
-            drakeInstance.register(this.querySelector(this.for ? this.for : '.tux-drag-drop-container'));
+            var target = this.querySelector(this.for ? this.for : '.tux-drag-drop-container');
+            target.zones = this.zones;
+            drakeInstance.register(target);
           }
         }, this);
       },
