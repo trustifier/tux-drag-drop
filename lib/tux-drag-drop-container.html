@@ -14,7 +14,7 @@ details.
       box-sizing: border-box;
     }
     </style>
-    <div id='wrapper' class='tux-drag-drop-container-wrapper'>
+    <div id='wrapper' class='tux-drag-drop-container-wrapper' zones='[[zones]]'>
       <content></content>
     </div>
   </template>
@@ -52,8 +52,15 @@ details.
         },
       },
 
+      observers: [ '_zonesChange(zones, for)' ],
 
       isReady: false,
+
+      _zonesChange: function (z, f) {
+            var target = this.querySelector(this.for ? this.for :
+                '.tux-drag-drop-container');
+            target.zones = this.zones;
+      },
 
       ready: function() {
         if(this.drake === null){
@@ -73,7 +80,9 @@ details.
         this.drake.split(/[,|\s]+/).forEach(function(drakeId) {
           var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
-            drakeInstance.register(this.querySelector(this.for ? this.for : '.tux-drag-drop-container'));
+            var target = this.querySelector(this.for ? this.for : '.tux-drag-drop-container');
+            target.zones = this.zones;
+            drakeInstance.register(target);
           }
         }, this);
       },

@@ -3,12 +3,11 @@
 <head>
   <link rel='stylesheet' href='/bower_components/dragula.js/dist/dragula.css' type='text/css'>
   <script src='/bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
-  <link rel="import" href='bower_components/polymer/polymer.html'>
-  <link rel="import" href="lib/tux-drake.html">
-  <link rel="import" href="lib/tux-drag-drop-container.html">
+  <link rel="import" href='/bower_components/polymer/polymer.html'>
+  <link rel="import" href="/bower_components/tux-drag-drop/tux-drag-drop.html">
 </head>
 <body unresolved>
-  <template is="dom-bind">
+  <template is="dom-bind" id='app'>
     <style>
       .wrapper {
         display: flex;
@@ -23,10 +22,10 @@
     <tux-drake id='foo'></tux-drake>
     <tux-drake id='bar'></tux-drake>
     <div class='wrapper'>
-      <tux-drag-drop-container drake='#foo' id='A' drop-zone='#myDropZone'>
-        <p>A Static Item</p>
+      <tux-drag-drop-container drake='#foo' id='A' for='#myDropZone'>
         <div id='myDropZone'>
-          <p>You can drag me to a foo drop</p>
+          <p not-draggable>A Static Item</p>
+          <p id='foop' on-drag='bar'>You can drag me to a foo drop</p>
           <p>and I love a foo drop too</p>
         </div>
       </tux-drag-drop-container>
@@ -36,16 +35,24 @@
     </div>
     <hr>
     <div class='wrapper'>
-      <tux-drag-drop-container drake='#bar' zones='1' id='C'>
-        <h1>You can drag me to a bar drop in zone 1</h1>
+      <tux-drag-drop-container drake='#bar' zones='a' id='C'>
+        <h1>You can drag me to a bar drop in zone a</h1>
       </tux-drag-drop-container>
-      <tux-drag-drop-container drake='#bar' zones='1,2' id='C'>
-        <h1>You can drag me to a bar drop in zone 1 or 2</h1>
+      <tux-drag-drop-container drake='#bar' zones='a, b' id='E'>
+        <h1>You can drag me to a bar drop in zone a or b</h1>
       </tux-drag-drop-container>
-      <tux-drag-drop-container drake='#bar' zones='2' id='D'>
-        <h1 zones='2'>You can drag me to a bar drop 2</h1>
+      <tux-drag-drop-container drake='#bar' zones='b' id='D'>
+        <h1 zones='b'>You can drag me to a bar drop b</h1>
       </tux-drag-drop-container>
     </div>
   </template>
+  <script>
+    window.addEventListener('WebComponentsReady', function() {
+      var app = document.querySelector('#app');
+      app.bar = function() {
+        console.log('bar got called');
+      }
+    });
+  </script>
 </body>
 </html>

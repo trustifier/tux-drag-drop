@@ -31,6 +31,8 @@
   ],
   "dependencies": {
     "dragula.js": "dragula#^3.1.0",
-    "polymer": "^1.1.2"
+    "mat-elements": "ExpandJS/mat-elements#~0.9.8",
+    "polymer": "^1.1.2",
+    "xp-elements": "ExpandJS/xp-elements#~0.9.8"
   }
 }

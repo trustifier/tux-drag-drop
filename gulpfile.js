@@ -25,11 +25,11 @@ gulp.task('test', function() {
     TEST_DIR,
     path.join(__dirname, 'bower_components/')
   );
+  gulp.src(['tux-drag-drop.html', 'bower.json', 'package.json'])
+    .pipe(gulp.dest(TEST_DIR));
 
-  gulp.src(['*.html', 'lib/**/*.js', 'lib/**/*.html'])
-    .pipe($.replace('../bower_components', bower_relative_path))
-    .pipe($.if('tux-drag-drop.html', gulp.dest(TEST_DIR), gulp.dest(path.join(TEST_DIR, 'lib'))))
-    .pipe($.size({title: 'tux-drag-drop'}));
+  gulp.src(['lib/**/*.js', 'lib/**/*.html'])
+    .pipe(gulp.dest(path.join(TEST_DIR, 'lib')));
 });
 
 gulp.task('default', ['test'], function() {});
