@@ -61,10 +61,10 @@ function commitReleases(msg) {
 function inc(importance) {
   return Promise.try(function() {
     return gulp.src(['./package.json', './bower.json'])
-    .pipe($.bump({ type: importance }))
+    .pipe(bump({ type: importance }))
     .pipe(gulp.dest('./'))
     .pipe($.filter('package.json'))
-    .pipe(tag())
+    .pipe(tag());
   });
 }
 
