@@ -21,21 +21,17 @@
       }
     </style>
     <tux-drake id='drake'></tux-drake>
-    <tux-drag-drop-container drake='#drake' for='#mylist #matListWrapper'
-      on-drag='collapseOnDrag' on-drop='uncollapseOnDrop'>
     <mat-list id='mylist'>
-      <mat-sublist label='Hello' id='mysublist' collapsible>
+    <tux-drag-drop-container drake='#drake'>
         <mat-item>Item A</mat-item>
         <mat-item>Item B</mat-item>
         <mat-item>Item C</mat-item>
-      </mat-sublist>
-      <mat-sublist label='Dolly' id='my2ndlist' collapsible>
+
         <mat-item>Item X</mat-item>
         <mat-item>Item Y</mat-item>
         <mat-item>Item Z</mat-item>
-      </mat-sublist>
-    </mat-list>
     </tux-drag-drop-container>
+    </mat-list>
 
     <tux-drag-drop-container drake='#drake' for='#cats #matListWrapper'>
       <mat-list id='cats'>
