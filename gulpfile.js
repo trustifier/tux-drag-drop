@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 var bump = require('gulp-bump');
-var tag = $.tagVersion;
+var tag = require('gulp-tag-version');
 var path = require('path');
 var fs = require('fs');
 var del = require('del');
@@ -23,7 +23,7 @@ gulp.task('clean', function() {
 
 function stash() {
   return Promise.try(function(){
-    $.git.stash({ args: 'save --include-untracked "gulp-stash"' },
+    $.git.stash({ args: 'save --include-untracked' },
     function(err) {
       if (err) throw  err;
       return true;
@@ -33,7 +33,7 @@ function stash() {
 
 function unstash(branch) {
   return Promise.try(function(){
-    $.git.stash({ args: 'pop gulp-stash' }, function(err) {
+    $.git.stash({ args: 'pop' }, function(err) {
       if (err) throw  err;
       return true;
     });
