@@ -55,9 +55,9 @@ function checkoutReleases() {
 
 function commitReleases(msg) {
   return Promise.try(function() {
-    gulp.src('*.json')
+    gulp.src(['package.json', 'bower.json'])
       .pipe($.git.add())
-      .pipe($.git.commit('gulp commit', { args: '-a', disableAppendPaths: true}));
+      .pipe($.git.commit('gulp commit', { args: '-m "version bumped" -a', disableAppendPaths: true}));
   });
 }
 
