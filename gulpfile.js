@@ -21,7 +21,8 @@ gulp.task('clean', function() {
 
 function saveBranch() {
   return Promise.try(function(){
-    $.git.stash(function(err) {
+    $.git.stash({ args: 'save --include-untracked "gulp-stash"' },
+    function(err) {
       if (err) throw  err;
       return true;
     });
@@ -29,7 +30,12 @@ function saveBranch() {
 }
 
 function restoreBranch(branch) {
-  return new Promise.try($.git.stash({ args: 'pop' }))
+  return Promise.try(function(){
+    $.git.stash({ args: 'pop gulp-stash' }, function(err) {
+      if (err) throw  err;
+      return true;
+    });
+  });
 }
 
 gulp.task('stash', saveBranch);
