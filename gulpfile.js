@@ -47,7 +47,16 @@ function checkoutReleases() {
   });
 }
 
+function commitReleases(msg) {
+  return Promise.try(function() {
+    gulp.src('*.json')
+      .pipe($.git.add())
+      .pipe($.git.commit('gulp commit', { args: '-a', disableAppendPaths: true}));
+  });
+}
+
 gulp.task('co:releases', checkoutReleases);
+gulp.task('ci:releases', commitReleases);
 
 function inc(importance) {
   return Promise.try(function() {
