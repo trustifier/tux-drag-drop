@@ -47,6 +47,8 @@ function checkoutReleases() {
   });
 }
 
+gulp.task('co:releases', checkoutReleases);
+
 function inc(importance) {
   return Promise.try(function() {
     return gulp.src(['./package.json', './bower.json'])
