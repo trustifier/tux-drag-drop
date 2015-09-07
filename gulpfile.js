@@ -31,6 +31,8 @@ function stash() {
   });
 }
 
+gulp.task('stash', stash);
+
 function unstash(branch) {
   return Promise.try(function(){
     $.git.stash({ args: 'pop' }, function(err) {
@@ -39,6 +41,7 @@ function unstash(branch) {
     });
   });
 }
+gulp.task('unstash', unstash);
 
 function checkoutReleases() {
   return Promise.try(function() {
