@@ -73,9 +73,7 @@ details.
         if(this.drake === null){
           throw new Error('<tux-drag-drop-container> without a corrosponding drake');
         }
-        this.async(function() {
-          this.isReady = true;
-        });
+        this.isReady = true;
       },
       attached: function() {
         this.register();
@@ -88,7 +86,7 @@ details.
           var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
             var target = this.querySelector(this.for ? this.for : '.tux-drag-drop-container');
-            target.zones = this.zones;
+            target.zones = this['zones'];
             drakeInstance.register(target);
           }
         }, this);

@@ -1,5 +1,7 @@
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
+var bump = require('gulp-bump');
+var tag = $.tagVersion;
 var path = require('path');
 var fs = require('fs');
 var del = require('del');
@@ -55,8 +57,6 @@ function commitReleases(msg) {
   });
 }
 
-gulp.task('co:releases', checkoutReleases);
-gulp.task('ci:releases', commitReleases);
 
 function inc(importance) {
   return Promise.try(function() {
@@ -64,6 +64,7 @@ function inc(importance) {
     .pipe($.bump({ type: importance }))
     .pipe(gulp.dest('./'))
     .pipe($.filter('package.json'))
+    .pipe(tag())
   });
 }
 
