@@ -36,7 +36,7 @@ gulp.task('stash', stash);
 function unstash(branch) {
   return Promise.try(function(){
     $.git.stash({ args: 'pop' }, function(err) {
-      if (err) throw  err;
+      if (err) { if(err.code === 1 ) return true; else throw err; }
       return true;
     });
   });
