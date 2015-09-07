@@ -20,17 +20,19 @@ gulp.task('clean', function() {
 });
 
 function saveBranch() {
-  return new Promise(function(resolve, reject) {
-    $.git.stash(function(err, result) {
-      if(err)
-        return reject(null);
-      return resolve(result.slice(3));
+  return Promise.try(function(){
+    $.git.stash(function(err) {
+      if (err) throw  err;
+      return true;
     });
-  })
+  });
 }
 
 function restoreBranch(branch) {
+  return new Promise.try($.git.stash({ args: 'pop' }))
 }
+
+gulp.task('stash', saveBranch);
 
 function inc(importance) {
   return Promise.try(function() {
