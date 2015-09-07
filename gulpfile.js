@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
+var filter = require('gulp-filter');
 var bump = require('gulp-bump');
 var tag = require('gulp-tag-version');
 var path = require('path');
@@ -66,7 +67,7 @@ function inc(importance) {
     return gulp.src(['./package.json', './bower.json'])
     .pipe(bump({ type: importance }))
     .pipe(gulp.dest('./'))
-    .pipe($.filter('package.json'))
+    .pipe(filter('package.json'))
     .pipe(tag());
   });
 }
