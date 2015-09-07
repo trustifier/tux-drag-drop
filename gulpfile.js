@@ -42,6 +42,7 @@ function checkoutReleases() {
   return Promise.try(function() {
     $.git.checkout('releases', function(err) {
       if(err) throw err;
+      return true;
     });
   });
 }
@@ -66,7 +67,9 @@ function push() {
 
 gulp.task('gh:rel',  function() {
     stash()
+    .then(checkoutReleases())
     .then(inc('patch'))
+    .then(commitReleases('versions bumped'))
     .then(push())
     .then(unstash());
 });
