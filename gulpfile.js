@@ -19,7 +19,7 @@ gulp.task('clean', function() {
     });
 });
 
-function saveBranch() {
+function stash() {
   return Promise.try(function(){
     $.git.stash({ args: 'save --include-untracked "gulp-stash"' },
     function(err) {
@@ -29,7 +29,7 @@ function saveBranch() {
   });
 }
 
-function restoreBranch(branch) {
+function unstash(branch) {
   return Promise.try(function(){
     $.git.stash({ args: 'pop gulp-stash' }, function(err) {
       if (err) throw  err;
@@ -38,13 +38,16 @@ function restoreBranch(branch) {
   });
 }
 
-gulp.task('stash', saveBranch);
-
-function inc(importance) {
+function checkoutReleases() {
   return Promise.try(function() {
     $.git.checkout('releases', function(err) {
       if(err) throw err;
     });
+  });
+}
+
+function inc(importance) {
+  return Promise.try(function() {
     return gulp.src(['./package.json', './bower.json'])
     .pipe($.bump({ type: importance }))
     .pipe(gulp.dest('./'))
@@ -52,17 +55,20 @@ function inc(importance) {
   });
 }
 
+function push() {
+  return new Promise.try(function() {
+    $.git.exec({ args: 'push --all'}, function(err) {
+      if(err) throw err;
+      return true;
+    });
+  })
+}
+
 gulp.task('gh:rel',  function() {
-  var branch = saveBranch();
-  branch
+    stash()
     .then(inc('patch'))
-    .then(new Promise(function(resolve, reject) {
-      $.git.exec({ args: 'push --all' }, function(err, result) {
-        if(err) reject(err);
-        resolve(result);
-      });
-    }))
-    .then(restoreBranch(branch));
+    .then(push())
+    .then(unstash());
 });
 
 
