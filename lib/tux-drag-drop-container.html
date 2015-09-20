@@ -8,10 +8,13 @@ details.
 <dom-module id='tux-drag-drop-container'>
   <template>
     <style>
-    #wrapper {
-      border: none;
-      padding: 0px;
+    #wrapper:empty {
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: rgba(0,0,0,0.025);
+      min-height: 10px;
+      min-width: 100%;
       box-sizing: border-box;
+      @apply(--wrapper);
     }
     </style>
     <div id='wrapper' class='tux-drag-drop-container-wrapper' zones='[[zones]]'>
@@ -34,6 +37,11 @@ details.
           notify: true,
           value: null
         },
+      	selector: {
+          type: String,
+          notify: true,
+          value: null,
+      	},
         for: {
           type: String,
           notify: true,
@@ -49,9 +57,16 @@ details.
           notify: true,
           reflectToAttribute: true,
           value: 'div',
-        }
+        },
+        copy: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
       },
 
+      listeners: { 'drop' : '_contentChanged' },
       observers: [ '_zonesChange(zones, for)' ],
 
       isReady: false,
@@ -69,6 +84,11 @@ details.
         }
       },
 
+      _contentChanged: function(e) {
+        if(this.$.wrapper.children.length === 0 ) {
+          this.$.wrapper.innerHTML = '';
+        }
+      },
       ready: function() {
         if(this.drake === null){
           throw new Error('<tux-drag-drop-container> without a corrosponding drake');
@@ -76,6 +96,9 @@ details.
         this.isReady = true;
       },
       attached: function() {
+        if(this.$.wrapper.children.length === 0 ) {
+          this.$.wrapper.innerHTML = '';
+        }
         this.register();
       },
       detached: function() {
@@ -85,15 +108,17 @@ details.
         this.drake.split(/[,|\s]+/).forEach(function(drakeId) {
           var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
-            var target = this.querySelector(this.for ? this.for : '.tux-drag-drop-container');
-            target.zones = this['zones'];
-            drakeInstance.register(target);
+            var target = this.for ? this.parentNode.querySelector(this.for) : this.$.wrapper;
+            Polymer.dom(target).classList.add('tux-drag-drop-container')
+            drakeInstance.register(this, target);
           }
         }, this);
       },
       unregister: function() {
         var drake = document.querySelector(this.drake);
-        drake.unregister(this.querySelector(this.for ? this.for : '.tux-drag-drop-container'));
+        var target = this.for ? this.parentNode.querySelector(this.for) : this.$.wrapper;
+        Polymer.dom(target).classList.remove('tux-drag-drop-container')
+        drake.unregister(this, target);
       }
     });
   </script>

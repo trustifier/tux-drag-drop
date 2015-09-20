@@ -19,13 +19,62 @@ details.
     Polymer({
       is: 'tux-drake',
       properties: {
+        removeOnSpill: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        sourceOnly: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        targetOnly: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        disabled: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        copy: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        }
       },
 
       _drake: null,
 
-      created: function() {
+      ready: function() {
         var self = this;
         this._drake = dragula({
+          moves: function(el, source, handle) {
+            if(self.disabled)
+              return false;
+
+            if(source.targetOnly)
+              return false;
+
+            if(el.handle){
+              return(el.querySelector(el.handle) === handle);
+            }
+
+            return true;
+          },
+          copy: function(source, container) {
+            return ('copy' in source) ? source.copy
+                  :('copy' in container) ? container.copy
+                  :self.copy;
+          },
+          removeOnSpill: self.removeOnSpill,
           invalid: function(el, target) {
             if(el.hasAttribute('not-draggable')) {
               return true;
@@ -33,6 +82,15 @@ details.
             return false;
           },
           accepts: function(el, target, source, sibling) {
+            if(self.disabled)
+              return false;
+
+            if(target.sourceOnly && target !== source)
+              return false;
+
+            if(source.targetOnly && target !== source)
+              return false;
+
             [el, target, source].forEach(function(f) {
               f.zones = (!f.zones && f.hasAttribute('zones'))
                 ? f.getAttribute('zones')
@@ -68,15 +126,29 @@ details.
         el.fire('drag', { 'drake': this, 'element': el, 'source': source });
         source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
         source.fire('drag', { 'drake': this, 'element': el, 'source': source });
+        if(source.shadyParent) {
+          source.shadyParent.fire('drag', { 'drake': this, 'element': el, 'source': source });
+        }
       },
 
       dropped: function(el, target, source) {
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
         el.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
-        source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-        source.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
-        target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
-        target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+        if(source) {
+          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+          source.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+          if(source.shadyParent) {
+            source.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source });
+          }
+        }
+        if(target) {
+          target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
+          target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+          if(target.shadyParent) {
+            target.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source });
+          }
+        }
+        return true;
       },
       dragEnd: function(el) {
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
@@ -85,12 +157,18 @@ details.
       dragCancel: function(el, source) {
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
         el.fire('drag-canceled', { 'drake': this,'element': el,  'source': source });
-        source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-        source.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
+        if(source) {
+          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+          source.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
+          if(source.shadyParent) {
+            source.shadyParent.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
+          }
+        }
       },
-      register: function(el) {
+      register: function(parent, el) {
         this.async(function() {
           if(this._drake.containers.indexOf(el) < 0 ) {
+            el.shadyParent = parent;
             this._drake.containers.push(el);
           }
         });
