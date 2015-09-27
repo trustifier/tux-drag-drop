@@ -60,7 +60,7 @@ details.
             if(self.disabled)
               return false;
 
-            if(source.targetOnly)
+            if(source.targetOnly || source.shadyParent.targetOnly)
               return false;
 
             if(el.handle){
@@ -71,7 +71,9 @@ details.
           },
           copy: function(source, container) {
             return ('copy' in source) ? source.copy
+                  :(source.shadyParent && 'copy' in source.shadyParent) ? source.shadyParent.copy
                   :('copy' in container) ? container.copy
+                  :(container.shadyParent && 'copy' in container.shadyParent) ? container.shadyParent.copy
                   :self.copy;
           },
           removeOnSpill: self.removeOnSpill,
@@ -81,15 +83,13 @@ details.
             }
             return false;
           },
+
           accepts: function(el, target, source, sibling) {
-            if(self.disabled)
-              return false;
+            if(self.disabled) { return false; }
 
-            if(target.sourceOnly && target !== source)
-              return false;
+            if((target.sourceOnly||target.shadyParent.sourceOnly) && target !== source){ return false; }
 
-            if(source.targetOnly && target !== source)
-              return false;
+            if((source.targetOnly||source.shadyParent.targetOnly) && target !== source){ return false; }
 
             [el, target, source].forEach(function(f) {
               f.zones = (!f.zones && f.hasAttribute('zones'))
@@ -97,7 +97,7 @@ details.
                 : f.zones;
             });
 
-            if ( !target.zones || !(source.zones || el.zones)) {
+            if ( !(target.zones || target.shadyParent.zones) || !(source.shadyParent.zones || el.zones)) {
                // we can add strict zoning here later
                // by looking for an extra flag like strict-zones
                // on the element or source, in which case
@@ -115,6 +115,7 @@ details.
         this._drake.on('drag', this.dragging);
         this._drake.on('drop', this.dropped);
         this._drake.on('dragend', this.dragEnd);
+        this._drake.on('out', this.dragOut);
         this._drake.on('cancel', this.dragCancel);
       },
 
@@ -142,10 +143,10 @@ details.
           }
         }
         if(target) {
-          target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
-          target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+          // target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
+          // target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
           if(target.shadyParent) {
-            target.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source });
+            target.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source, 'target': target });
           }
         }
         return true;
@@ -153,6 +154,17 @@ details.
       dragEnd: function(el) {
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
         el.fire('drag-ended', { 'drake': this });
+      },
+      dragOut: function(el, lastDropTarget, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag-out', { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source });
+        if(source) {
+          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+          source.fire('drag-out', { 'drake': this, 'element': el, 'source': source });
+          if(source.shadyParent) {
+            source.shadyParent.fire('drag-out', { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source });
+          }
+        }
       },
       dragCancel: function(el, source) {
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
@@ -166,12 +178,10 @@ details.
         }
       },
       register: function(parent, el) {
-        this.async(function() {
-          if(this._drake.containers.indexOf(el) < 0 ) {
-            el.shadyParent = parent;
-            this._drake.containers.push(el);
-          }
-        });
+        if(this._drake.containers.indexOf(el) < 0 ) {
+          el.shadyParent = parent;
+          this._drake.containers.push(el);
+        }
       },
       unregister: function(el) {
         var idx = this._drake.containers.indexOf(el);

@@ -8,6 +8,10 @@ details.
 <dom-module id='tux-drag-drop-container'>
   <template>
     <style>
+    :host:not([showed]) {
+      display: none !important;
+    }
+
     #wrapper:empty {
       border: 1px solid rgba(0, 0, 0, 0.1);
       background-color: rgba(0,0,0,0.025);
@@ -17,9 +21,11 @@ details.
       @apply(--wrapper);
     }
     </style>
-    <div id='wrapper' class='tux-drag-drop-container-wrapper' zones='[[zones]]'>
-      <content></content>
-    </div>
+    <template is='dom-if' if='[[!for]]'>
+      <div id='wrapper' class='tux-drag-drop-container-wrapper' zones='[[zones]]'>
+        <content></content>
+      </div>
+    </template>
   </template>
   <script>
     /**
@@ -32,6 +38,12 @@ details.
     Polymer({
       is: 'tux-drag-drop-container',
       properties: {
+        showed: {
+          type: Boolean,
+          notify: true,
+          value: true,
+          reflectToAttribute: true
+        },
         drake: {
           type: String,
           notify: true,
@@ -64,16 +76,45 @@ details.
           reflectToAttribute: true,
           value: false
         },
+
+        targetOnly: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        dragging: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false,
+          readonly: true
+        },
+
+        candidateZone: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false,
+          readonly: true
+        }
       },
 
-      listeners: { 'drop' : '_contentChanged' },
+      listeners: {
+        'drop': '_handleDrop',
+        'drag': '_handleDrag',
+      },
       observers: [ '_zonesChange(zones, for)' ],
 
       isReady: false,
 
+      _getTarget: function() {
+            return this.for ? this.parentNode.querySelector(this.for) : this.$.wrapper;
+      },
+
       _zonesChange: function (z, f) {
-        var target = this.querySelector(this.for ? this.for :
-          '.tux-drag-drop-container');
+        var target = this._getTarget();
         if (this.zones)
           target.zones = this.zones;
         if (this.drake)  {
@@ -84,19 +125,54 @@ details.
         }
       },
 
-      _contentChanged: function(e) {
-        if(this.$.wrapper.children.length === 0 ) {
+      _getZonesList: function() {
+          return this.zones.replace(/\s/g, '').split(',');
+      },
+
+      _clearDragging: function(e) {
+          var self = this;
+          self.dragging = false;
+          var zones = self._getZonesList();
+          zones.forEach(function(zoneId) {
+            var zone = document.querySelector('#' + zoneId);
+            if(zone) {
+              Polymer.dom(zone).removeAttribute('candidate-zone');
+              zone.fire('candidate-zone-end', e.detail);
+            }
+          });
+      },
+
+      _handleDrag: function(e) {
+          var self = this;
+          self.dragging = true;
+          var zones = self._getZonesList();
+          zones.forEach(function(zoneId) {
+            var zone = document.querySelector('#' + zoneId);
+            if(zone) {
+              Polymer.dom(zone).setAttribute('candidate-zone', '');
+              zone.fire('candidate-zone', e.detail);
+            }
+          });
+      },
+
+      _handleDrop: function(e) {
+        this._clearDragging(e);
+        if(this.$.wrapper && this.$.wrapper.children.length === 0 ) {
           this.$.wrapper.innerHTML = '';
         }
       },
+
       ready: function() {
         if(this.drake === null){
           throw new Error('<tux-drag-drop-container> without a corrosponding drake');
         }
         this.isReady = true;
+        if(!!this.for) {
+          this.showed = false;
+        }
       },
       attached: function() {
-        if(this.$.wrapper.children.length === 0 ) {
+        if(this.$.wrapper && this.$.wrapper.children.length === 0 ) {
           this.$.wrapper.innerHTML = '';
         }
         this.register();
@@ -108,16 +184,16 @@ details.
         this.drake.split(/[,|\s]+/).forEach(function(drakeId) {
           var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
-            var target = this.for ? this.parentNode.querySelector(this.for) : this.$.wrapper;
-            Polymer.dom(target).classList.add('tux-drag-drop-container')
+            var target = this._getTarget();
+            Polymer.dom(target).classList.add('tux-drag-drop-container');
             drakeInstance.register(this, target);
           }
         }, this);
       },
       unregister: function() {
         var drake = document.querySelector(this.drake);
-        var target = this.for ? this.parentNode.querySelector(this.for) : this.$.wrapper;
-        Polymer.dom(target).classList.remove('tux-drag-drop-container')
+        var target = this._getTarget();
+        Polymer.dom(target).classList.remove('tux-drag-drop-container');
         drake.unregister(this, target);
       }
     });
