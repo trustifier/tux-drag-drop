@@ -1,0 +1,21 @@
+<link rel="import" href="../polymer/polymer.html">
+<dom-module id='drag-reflection'>
+  <template>
+    :host {
+      display: none;
+    }
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+      is: 'drag-reflection',
+      properties: {
+        for: {
+          type: String,
+          notify: true,
+          value: null
+        }
+      }
+    });
+  </script>
+</dom-module>

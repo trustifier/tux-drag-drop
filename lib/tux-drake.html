@@ -1,0 +1,200 @@
+<!--
+@license
+Copyright (c) 2015 Tux Authors
+This code is distributed under the MIT license.  See LICENSE.txt for
+details.
+
+@description a set of elements that encapsulate the excellent dragula.js
+@group elements
+@dependency dragula dragula.js
+@dependency tux-draggable trustifier/tux-draggable.html
+@dependency tux-drop-zone trustifier/tux-drop-zone.html
+
+@demo
+-->
+<script src='../../dragula.js/dist/dragula.js'></script>
+<link rel="import" href="../../polymer/polymer.html">
+<dom-module id='tux-drake'>
+  <script>
+    Polymer({
+      is: 'tux-drake',
+      properties: {
+        removeOnSpill: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        sourceOnly: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        targetOnly: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        disabled: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        copy: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        }
+      },
+
+      _drake: null,
+
+      ready: function() {
+        var self = this;
+        this._drake = dragula({
+          moves: function(el, source, handle) {
+            if(self.disabled)
+              return false;
+
+            if(source.targetOnly || source.shadyParent.targetOnly)
+              return false;
+
+            if(el.handle){
+              return(el.querySelector(el.handle) === handle);
+            }
+
+            return true;
+          },
+          copy: function(source, container) {
+            return ('copy' in source) ? source.copy
+                  :(source.shadyParent && 'copy' in source.shadyParent) ? source.shadyParent.copy
+                  :('copy' in container) ? container.copy
+                  :(container.shadyParent && 'copy' in container.shadyParent) ? container.shadyParent.copy
+                  :self.copy;
+          },
+          removeOnSpill: self.removeOnSpill,
+          invalid: function(el, target) {
+            if(el.hasAttribute('not-draggable')) {
+              return true;
+            }
+            return false;
+          },
+
+          accepts: function(el, target, source, sibling) {
+            if(self.disabled) { return false; }
+
+            if((target.sourceOnly||target.shadyParent.sourceOnly) && target !== source){ return false; }
+
+            if((source.targetOnly||source.shadyParent.targetOnly) && target !== source){ return false; }
+
+            [el, target, source].forEach(function(f) {
+              f.zones = (!f.zones && f.hasAttribute('zones'))
+                ? f.getAttribute('zones')
+                : f.zones;
+            });
+
+            if ( !(target.zones || target.shadyParent.zones) || !(source.shadyParent.zones || el.zones)) {
+               // we can add strict zoning here later
+               // by looking for an extra flag like strict-zones
+               // on the element or source, in which case
+               // this would become false
+              return true;
+            }
+
+            var szA = (el.zones     ? el.zones :
+                      (source.zones ? source.zones :
+                      (source.shadyParent.zones ? source.shadyParent.zones : "*"))).split(/[,|\s]+/);
+            var tzA = (target.zones ? target.zones :
+                      (target.shadyParent.zones ? target.shadyParent.zones : "*")).split(/[,|\s]+/);
+            if(szA === '*' || tzA === '*') { return true; }
+            var retval =  szA.some(function(m) {
+              return (tzA.indexOf(m) !== -1);
+            });
+            console.log('returning: ', retval);
+            return retval;
+          }
+        });
+        this._drake.on('drag', this.dragging);
+        this._drake.on('drop', this.dropped);
+        this._drake.on('dragend', this.dragEnd);
+        this._drake.on('out', this.dragOut);
+        this._drake.on('cancel', this.dragCancel);
+      },
+
+      /**
+       * @param {Element} elements that we want to attach to
+       */
+      dragging: function(el, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag', { 'drake': this, 'element': el, 'source': source });
+        source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+        source.fire('drag', { 'drake': this, 'element': el, 'source': source });
+        if(source.shadyParent) {
+          source.shadyParent.fire('drag', { 'drake': this, 'element': el, 'source': source });
+        }
+      },
+
+      dropped: function(el, target, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+        if(source) {
+          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+          source.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+          if(source.shadyParent) {
+            source.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source });
+          }
+        }
+        if(target) {
+          // target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
+          // target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+          if(target.shadyParent) {
+            target.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source, 'target': target });
+          }
+        }
+        return true;
+      },
+      dragEnd: function(el) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag-ended', { 'drake': this });
+      },
+      dragOut: function(el, lastDropTarget, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag-out', { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source });
+        if(source) {
+          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+          source.fire('drag-out', { 'drake': this, 'element': el, 'source': source });
+          if(source.shadyParent) {
+            source.shadyParent.fire('drag-out', { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source });
+          }
+        }
+      },
+      dragCancel: function(el, source) {
+        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+        el.fire('drag-canceled', { 'drake': this,'element': el,  'source': source });
+        if(source) {
+          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+          source.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
+          if(source.shadyParent) {
+            source.shadyParent.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
+          }
+        }
+      },
+      register: function(parent, el) {
+        if(this._drake.containers.indexOf(el) < 0 ) {
+          el.shadyParent = parent;
+          this._drake.containers.push(el);
+        }
+      },
+      unregister: function(el) {
+        var idx = this._drake.containers.indexOf(el);
+        if(idx >= 0) {
+          this._drake.containers.splice(idx, 1);
+        }
+      }
+    });
+  </script>
+</dom-module>

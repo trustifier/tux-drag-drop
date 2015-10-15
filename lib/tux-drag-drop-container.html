@@ -1,0 +1,206 @@
+<!--
+@license
+Copyright (c) 2015 Tux Authors
+This code is distributed under the MIT license.  See LICENSE.txt for
+details.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<dom-module id='tux-drag-drop-container'>
+  <template>
+    <style>
+    :host:not([showed]) {
+      display: none !important;
+    }
+
+    #wrapper:empty {
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background-color: rgba(0,0,0,0.025);
+      min-height: 10px;
+      min-width: 100%;
+      box-sizing: border-box;
+      @apply(--wrapper);
+    }
+    </style>
+    <template is='dom-if' if='[[!for]]'>
+      <div id='wrapper' class='tux-drag-drop-container-wrapper' zones='[[zones]]'>
+        <content></content>
+      </div>
+    </template>
+  </template>
+  <script>
+    /**
+    * rewraps content contents of an element into a
+    * new element
+    * old {element} The element to rewrap
+    * new {string} Name of the new tag to replace  old with
+    * returns the new element
+    */
+    Polymer({
+      is: 'tux-drag-drop-container',
+      properties: {
+        showed: {
+          type: Boolean,
+          notify: true,
+          value: true,
+          reflectToAttribute: true
+        },
+        drake: {
+          type: String,
+          notify: true,
+          value: null
+        },
+      	selector: {
+          type: String,
+          notify: true,
+          value: null,
+      	},
+        for: {
+          type: String,
+          notify: true,
+          value: null
+        },
+        zones: {
+          type: String,
+          notify: true,
+          value: null
+        },
+        wrapper: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+          value: 'div',
+        },
+        copy: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        targetOnly: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        dragging: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false,
+          readonly: true
+        },
+
+        candidateZone: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false,
+          readonly: true
+        }
+      },
+
+      listeners: {
+        'drop': '_handleDrop',
+        'drag': '_handleDrag',
+      },
+      observers: [ '_zonesChange(zones, for)' ],
+
+      isReady: false,
+
+      _getTarget: function() {
+          return !!this.for ? this.parentNode.querySelector(this.for) : this.$.wrapper;
+      },
+
+      _zonesChange: function (z, f) {
+        var target = this._getTarget();
+        if (!target)
+          return;
+
+        if (this.zones) {
+          target.zones = this.zones;
+        }
+
+        if (this.drake)  {
+          var drakeInstance = document.querySelector(this.drake);
+          if(drakeInstance) {
+            drakeInstance.register(target);
+          }
+        }
+      },
+
+      _getZonesList: function() {
+          return this.zones.replace(/\s/g, '').split(',');
+      },
+
+      _clearDragging: function(e) {
+          var self = this;
+          self.dragging = false;
+          var zones = self._getZonesList();
+          zones.forEach(function(zoneId) {
+            var zone = document.querySelector('#' + zoneId);
+            if(zone) {
+              Polymer.dom(zone).removeAttribute('candidate-zone');
+              zone.fire('candidate-zone-end', e.detail);
+            }
+          });
+      },
+
+      _handleDrag: function(e) {
+          var self = this;
+          self.dragging = true;
+          var zones = self._getZonesList();
+          zones.forEach(function(zoneId) {
+            var zone = document.querySelector('#' + zoneId);
+            if(zone) {
+              Polymer.dom(zone).setAttribute('candidate-zone', '');
+              zone.fire('candidate-zone', e.detail);
+            }
+          });
+      },
+
+      _handleDrop: function(e) {
+        this._clearDragging(e);
+        if(this.$.wrapper && this.$.wrapper.children.length === 0 ) {
+          this.$.wrapper.innerHTML = '';
+        }
+      },
+
+      ready: function() {
+        if(this.drake === null){
+          throw new Error('<tux-drag-drop-container> without a corrosponding drake');
+        }
+        this.isReady = true;
+        if(!!this.for) {
+          this.showed = false;
+        }
+      },
+      attached: function() {
+        if(this.$.wrapper && this.$.wrapper.children.length === 0 ) {
+          this.$.wrapper.innerHTML = '';
+        }
+        this.register();
+      },
+      detached: function() {
+        this.unregister();
+      },
+      register: function() {
+        this.drake.split(/[,|\s]+/).forEach(function(drakeId) {
+          var drakeInstance = document.querySelector(drakeId);
+          if(drakeInstance) {
+            var target = this._getTarget();
+            Polymer.dom(target).classList.add('tux-drag-drop-container');
+            drakeInstance.register(this, target);
+          }
+        }, this);
+      },
+      unregister: function() {
+        var drake = document.querySelector(this.drake);
+        var target = this._getTarget();
+        Polymer.dom(target).classList.remove('tux-drag-drop-container');
+        drake.unregister(this, target);
+      }
+    });
+  </script>
+</dom-module>

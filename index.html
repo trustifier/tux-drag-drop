@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <link rel='stylesheet' href='/bower_components/dragula.js/dist/dragula.css' type='text/css'>
+  <script src='/bower_components/webcomponentsjs/webcomponents-lite.min.js'></script>
+  <link rel="import" href='/bower_components/polymer/polymer.html'>
+  <link rel="import" href="/bower_components/tux-drag-drop/tux-drag-drop.html">
+  <link rel='import' href='/bower_components/mat-elements/mat-elements.html'>
+</head>
+<body unresolved>
+  <template is="dom-bind" id='app'>
+    <style>
+      .wrapper {
+        display: flex;
+      }
+      #myDropZone {
+        min-height: 200px;
+        min-width: 200px;
+        background: #CCC;
+        border-radius: 8px;
+      }
+    </style>
+    <tux-drake id='drake'></tux-drake>
+    <div>
+    <tux-drag-drop-container drake='#drake' for='#abc #matListWrapper'>
+      <mat-list id='abc'>
+        <mat-item id='a'>Item A</mat-item>
+        <mat-item id='b'>Item B</mat-item>
+        <mat-item id='c'>Item C</mat-item>
+      </mat-list>
+    </tux-drag-drop-container>
+
+    <tux-drag-drop-container drake='#drake' for='#xyz #matListWrapper'>
+      <mat-list id='xyz'>
+        <mat-item id='x' secondary-text='I am X'>Item X</mat-item>
+        <mat-item id='y' secondary-text='I am Y'>Item Y</mat-item>
+        <mat-item id='z' secondary-text='I am Z'>Item Z</mat-item>
+      </mat-list>
+    </tux-drag-drop-container>
+  </div>
+  </template>
+  <script>
+    window.addEventListener('WebComponentsReady', function() {
+      var app = document.querySelector('#app');
+      app.bar = function() {
+        console.log('bar got called');
+      }
+      app.collapseOnDrag  = function(event){
+        var el = event.detail.element;
+        var src = event.detail.source;
+        if(!el.collapsed) {
+          el.wasNotCollapsedBeforeDrag = true;
+          el.collapse();
+        }
+      }
+      app.uncollapseOnDrop = function(event) {
+        var el = event.detail.element;
+        if(el.wasNotCollapsedBeforeDrag)
+          el.expand();
+      }
+    });
+  </script>
+</body>
+</html>
