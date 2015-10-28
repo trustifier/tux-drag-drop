@@ -180,7 +180,9 @@ details.
         if(this.$.wrapper && this.$.wrapper.children.length === 0 ) {
           this.$.wrapper.innerHTML = '';
         }
-        this.register();
+        this.async(function() {
+            this.register();
+        });
       },
       detached: function() {
         this.unregister();
