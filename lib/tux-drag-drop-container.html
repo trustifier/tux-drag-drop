@@ -83,7 +83,12 @@ details.
           reflectToAttribute: true,
           value: false
         },
-
+        dataOnly: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            value: false
+        },
         dragging: {
           type: Boolean,
           notify: true,
@@ -149,7 +154,6 @@ details.
       },
 
       _handleCloned: function(e) {
-          console.log('cloned', e.detail);
           e.detail.copy.data = e.detail.element.data;
       },
 
@@ -168,9 +172,13 @@ details.
 
       _handleDrop: function(e) {
         this._clearDragging(e);
-        console.log('event details: ', e.detail);
         if(this.$.wrapper && this.$.wrapper.children.length === 0 ) {
           this.$.wrapper.innerHTML = '';
+        }
+        if(this.dataOnly) {
+            if(e.detail.source !== e.detail.target ) {
+                Polymer.dom(e.detail.target).removeChild(e.detail.element);
+            }
         }
       },
 

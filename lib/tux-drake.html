@@ -140,12 +140,13 @@ details.
       dragging: function(el, source) {
         var data = { 'drake': this, 'element': el, 'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-
         el.fire('drag', data);
-        source.fire('drag', data);
-        if(source.shadyParent) {
-          source.shadyParent.fire('drag', data);
+        if(source instanceof Object) {
+            source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+            source.fire('drag', data);
+            if(source.shadyParent) {
+              source.shadyParent.fire('drag', data);
+            }
         }
       },
 
@@ -153,7 +154,7 @@ details.
         var data = { 'drake': this, 'element': el, 'target': target, 'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
         el.fire('drop', data);
-        if(source) {
+        if(source instanceof Object) {
           source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
           source.fire('drop', data);
           if(source.shadyParent) {
@@ -177,7 +178,7 @@ details.
         var data = { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
         el.fire('drag-out', data);
-        if(source) {
+        if(source instanceof Object) {
           source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
           source.fire('drag-out', data);
           if(source.shadyParent) {
@@ -189,7 +190,7 @@ details.
         var data = { 'drake': this,'element': el,  'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
         el.fire('drag-canceled', data);
-        if(source) {
+        if(source instanceof Object) {
           source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
           source.fire('drag-canceled', data);
           if(source.shadyParent) {
