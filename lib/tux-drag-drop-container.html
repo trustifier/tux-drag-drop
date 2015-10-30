@@ -102,6 +102,7 @@ details.
       },
 
       listeners: {
+        'cloned': '_handleCloned',
         'drop': '_handleDrop',
         'drag': '_handleDrag',
       },
@@ -147,6 +148,11 @@ details.
           });
       },
 
+      _handleCloned: function(e) {
+          console.log('cloned', e.detail);
+          e.detail.copy.data = e.detail.element.data;
+      },
+
       _handleDrag: function(e) {
           var self = this;
           self.dragging = true;
@@ -162,6 +168,7 @@ details.
 
       _handleDrop: function(e) {
         this._clearDragging(e);
+        console.log('event details: ', e.detail);
         if(this.$.wrapper && this.$.wrapper.children.length === 0 ) {
           this.$.wrapper.innerHTML = '';
         }

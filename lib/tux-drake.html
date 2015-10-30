@@ -123,36 +123,48 @@ details.
         this._drake.on('dragend', this.dragEnd);
         this._drake.on('out', this.dragOut);
         this._drake.on('cancel', this.dragCancel);
+        this._drake.on('cloned', this.cloned);
       },
 
       /**
        * @param {Element} elements that we want to attach to
        */
+      cloned: function(el, copy, source) {
+         var data = { 'drake': this, 'element': el, 'copy': copy, 'source': source};
+         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+         source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
+         el.fire('cloned', data);
+         source.fire('cloned', data);
+         if(source.shadyParent) { source.shadyParent.fire('cloned', data); }
+      },
       dragging: function(el, source) {
+        var data = { 'drake': this, 'element': el, 'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drag', { 'drake': this, 'element': el, 'source': source });
         source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-        source.fire('drag', { 'drake': this, 'element': el, 'source': source });
+
+        el.fire('drag', data);
+        source.fire('drag', data);
         if(source.shadyParent) {
-          source.shadyParent.fire('drag', { 'drake': this, 'element': el, 'source': source });
+          source.shadyParent.fire('drag', data);
         }
       },
 
       dropped: function(el, target, source) {
+        var data = { 'drake': this, 'element': el, 'target': target, 'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+        el.fire('drop', data);
         if(source) {
           source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-          source.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
+          source.fire('drop', data);
           if(source.shadyParent) {
-            source.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source });
+            source.shadyParent.fire('drop', data);
           }
         }
         if(target) {
           // target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
           // target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
           if(target.shadyParent) {
-            target.shadyParent.fire('drop', { 'drake': this, 'element': el, 'source': source, 'target': target });
+            target.shadyParent.fire('drop', data);
           }
         }
         return true;
@@ -162,24 +174,26 @@ details.
         el.fire('drag-ended', { 'drake': this });
       },
       dragOut: function(el, lastDropTarget, source) {
+        var data = { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drag-out', { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source });
+        el.fire('drag-out', data);
         if(source) {
           source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-          source.fire('drag-out', { 'drake': this, 'element': el, 'source': source });
+          source.fire('drag-out', data);
           if(source.shadyParent) {
-            source.shadyParent.fire('drag-out', { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source });
+            source.shadyParent.fire('drag-out', data);
           }
         }
       },
       dragCancel: function(el, source) {
+        var data = { 'drake': this,'element': el,  'source': source };
         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drag-canceled', { 'drake': this,'element': el,  'source': source });
+        el.fire('drag-canceled', data);
         if(source) {
           source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-          source.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
+          source.fire('drag-canceled', data);
           if(source.shadyParent) {
-            source.shadyParent.fire('drag-canceled', { 'drake': this, 'element': el, 'source': source });
+            source.shadyParent.fire('drag-canceled', data);
           }
         }
       },
