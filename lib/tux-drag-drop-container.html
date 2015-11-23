@@ -207,8 +207,13 @@ details.
           var drakeInstance = document.querySelector(drakeId);
           if(drakeInstance) {
             var target = this._getTarget();
-            Polymer.dom(target).classList.add('tux-drag-drop-container');
-            drakeInstance.register(this, target);
+            if(target) {
+                Polymer.dom(target).classList.add('tux-drag-drop-container');
+                drakeInstance.register(this, target);
+            }
+            else {
+                console.warn('unable to find target for drake instance: ', drakeInstance);
+            }
           }
         }, this);
       },
