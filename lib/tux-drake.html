@@ -15,201 +15,219 @@ details.
 <script src='../../dragula.js/dist/dragula.js'></script>
 <link rel="import" href="../../polymer/polymer.html">
 <dom-module id='tux-drake'>
-  <script>
+    <script>
     Polymer({
-      is: 'tux-drake',
-      properties: {
-        removeOnSpill: {
-          type: Boolean,
-          notify: true,
-          reflectToAttribute: true,
-          value: false
-        },
-        sourceOnly: {
-          type: Boolean,
-          notify: true,
-          reflectToAttribute: true,
-          value: false
-        },
-        targetOnly: {
-          type: Boolean,
-          notify: true,
-          reflectToAttribute: true,
-          value: false
-        },
-        disabled: {
-          type: Boolean,
-          notify: true,
-          reflectToAttribute: true,
-          value: false
-        },
-        copy: {
-          type: Boolean,
-          notify: true,
-          reflectToAttribute: true,
-          value: false
-        }
-      },
-
-      _drake: null,
-
-      ready: function() {
-        var self = this;
-        this._drake = dragula({
-          moves: function(el, source, handle) {
-            if(self.disabled)
-              return false;
-
-            if(source.targetOnly || source.shadyParent.targetOnly)
-              return false;
-
-            if(el.handle){
-              return(el.querySelector(el.handle) === handle);
+        is: 'tux-drake',
+        properties: {
+            removeOnSpill: {
+                type: Boolean,
+                notify: true,
+                reflectToAttribute: true,
+                value: false
+            },
+            sourceOnly: {
+                type: Boolean,
+                notify: true,
+                reflectToAttribute: true,
+                value: false
+            },
+            targetOnly: {
+                type: Boolean,
+                notify: true,
+                reflectToAttribute: true,
+                value: false
+            },
+            disabled: {
+                type: Boolean,
+                notify: true,
+                reflectToAttribute: true,
+                value: false
+            },
+            copy: {
+                type: Boolean,
+                notify: true,
+                reflectToAttribute: true,
+                value: false
             }
+        },
 
-            return true;
-          },
-          copy: function(source, container) {
-            return ('copy' in source) ? source.copy
-                  :(source.shadyParent && 'copy' in source.shadyParent) ? source.shadyParent.copy
-                  :('copy' in container) ? container.copy
-                  :(container.shadyParent && 'copy' in container.shadyParent) ? container.shadyParent.copy
-                  :self.copy;
-          },
-          removeOnSpill: self.removeOnSpill,
-          invalid: function(el, target) {
-            if(el.hasAttribute('not-draggable')) {
-              return true;
-            }
-            return false;
-          },
+        _drake: null,
 
-          accepts: function(el, target, source, sibling) {
-            if(self.disabled) { return false; }
+        ready: function() {
+            var self = this;
+            this._drake = dragula({
+                moves: function(el, source, handle) {
+                    if(self.disabled)
+                    return false;
 
-            if((target.sourceOnly||target.shadyParent.sourceOnly) && target !== source){ return false; }
+                    if(source.targetOnly || source.shadyParent.targetOnly)
+                    return false;
 
-            if((source.targetOnly||source.shadyParent.targetOnly) && target !== source){ return false; }
+                    if(el.handle){
+                        return(el.querySelector(el.handle) === handle);
+                    }
 
-            [el, target, source].forEach(function(f) {
-              f.zones = (!f.zones && f.hasAttribute('zones'))
-                ? f.getAttribute('zones')
-                : f.zones;
-            });
+                    return true;
+                },
+                copy: function(source, container) {
+                    return ('copy' in source) ? source.copy
+                    :(source.shadyParent && 'copy' in source.shadyParent) ? source.shadyParent.copy
+                    :('copy' in container) ? container.copy
+                    :(container.shadyParent && 'copy' in container.shadyParent) ? container.shadyParent.copy
+                    :self.copy;
+                },
+                removeOnSpill: self.removeOnSpill,
+                invalid: function(el, target) {
+                    if(el.hasAttribute('not-draggable')) {
+                        return true;
+                    }
+                    return false;
+                },
 
-            if ( !(target.zones || target.shadyParent.zones) || !(source.shadyParent.zones || el.zones)) {
-               // we can add strict zoning here later
-               // by looking for an extra flag like strict-zones
-               // on the element or source, in which case
-               // this would become false
-              return true;
-            }
+                accepts: function(el, target, source, sibling) {
+                    if(self.disabled) { return false; }
 
-            var szA = (el.zones     ? el.zones :
-                      (source.zones ? source.zones :
-                      (source.shadyParent.zones ? source.shadyParent.zones : "*"))).split(/[,|\s]+/);
-            var tzA = (target.zones ? target.zones :
-                      (target.shadyParent.zones ? target.shadyParent.zones : "*")).split(/[,|\s]+/);
-            if(szA === '*' || tzA === '*') { return true; }
-            var retval =  szA.some(function(m) {
-              return (tzA.indexOf(m) !== -1);
-            });
-            console.log('returning: ', retval);
-            return retval;
-          }
-        });
-        this._drake.on('drag', this.dragging);
-        this._drake.on('drop', this.dropped);
-        this._drake.on('dragend', this.dragEnd);
-        this._drake.on('out', this.dragOut);
-        this._drake.on('cancel', this.dragCancel);
-        this._drake.on('cloned', this.cloned);
-      },
+                    if((target.sourceOnly||target.shadyParent.sourceOnly) && target !== source){ return false; }
 
-      /**
-       * @param {Element} elements that we want to attach to
-       */
-      cloned: function(el, copy, source) {
-         var data = { 'drake': this, 'element': el, 'copy': copy, 'source': source};
-         el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-         source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-         el.fire('cloned', data);
-         source.fire('cloned', data);
-         if(source.shadyParent) { source.shadyParent.fire('cloned', data); }
-      },
-      dragging: function(el, source) {
-        var data = { 'drake': this, 'element': el, 'source': source };
-        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drag', data);
-        if(source instanceof Object) {
-            source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-            source.fire('drag', data);
-            if(source.shadyParent) {
-              source.shadyParent.fire('drag', data);
-            }
-        }
-      },
+                    if((source.targetOnly||source.shadyParent.targetOnly) && target !== source){ return false; }
 
-      dropped: function(el, target, source) {
-        var data = { 'drake': this, 'element': el, 'target': target, 'source': source };
-        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drop', data);
-        if(source instanceof Object) {
-          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-          source.fire('drop', data);
-          if(source.shadyParent) {
-            source.shadyParent.fire('drop', data);
-          }
-        }
-        if(target) {
-          // target.fire = ('fire' in target && target.fire) || Polymer.Base.fire;
-          // target.fire('drop', { 'drake': this, 'element': el, 'target': target, 'source': source });
-          if(target.shadyParent) {
-            target.shadyParent.fire('drop', data);
-          }
-        }
-        return true;
-      },
-      dragEnd: function(el) {
-        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drag-ended', { 'drake': this });
-      },
-      dragOut: function(el, lastDropTarget, source) {
-        var data = { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source };
-        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drag-out', data);
-        if(source instanceof Object) {
-          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-          source.fire('drag-out', data);
-          if(source.shadyParent) {
-            source.shadyParent.fire('drag-out', data);
-          }
-        }
-      },
-      dragCancel: function(el, source) {
-        var data = { 'drake': this,'element': el,  'source': source };
-        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
-        el.fire('drag-canceled', data);
-        if(source instanceof Object) {
-          source.fire = ('fire' in source && source.fire) || Polymer.Base.fire;
-          source.fire('drag-canceled', data);
-          if(source.shadyParent) {
-            source.shadyParent.fire('drag-canceled', data);
-          }
-        }
-      },
-      register: function(parent, el) {
-        if(this._drake.containers.indexOf(el) < 0 ) {
-          el.shadyParent = parent;
-          this._drake.containers.push(el);
-        }
-      },
-      unregister: function(el) {
-        var idx = this._drake.containers.indexOf(el);
-        if(idx >= 0) {
-          this._drake.containers.splice(idx, 1);
-        }
-      }
-    });
-  </script>
-</dom-module>
+                    [el, target, source].forEach(function(f) {
+                        f.zones = (!f.zones && f.hasAttribute('zones'))
+                        ? f.getAttribute('zones')
+                        : f.zones;
+                    });
+
+                    if ( !(target.zones || target.shadyParent.zones) || !(source.shadyParent.zones || el.zones)) {
+                        // we can add strict zoning here later
+                        // by looking for an extra flag like strict-zones
+                        // on the element or source, in which case
+                        // this would become false
+                        return true;
+                    }
+
+                    var szA = (el.zones     ? el.zones :
+                        (source.zones ? source.zones :
+                            (source.shadyParent.zones ? source.shadyParent.zones : "*"))).split(/[,|\s]+/);
+                            var tzA = (target.zones ? target.zones :
+                                (target.shadyParent.zones ? target.shadyParent.zones : "*")).split(/[,|\s]+/);
+                                if(szA === '*' || tzA === '*') { return true; }
+                                var retval =  szA.some(function(m) {
+                                    return (tzA.indexOf(m) !== -1);
+                                });
+                                console.log('returning: ', retval);
+                                return retval;
+                            }
+                        });
+                        this._drake.on('drag', this.dragging.bind(this));
+                        this._drake.on('drop', this.dropped.bind(this));
+                        this._drake.on('dragend', this.dragEnd.bind(this));
+                        this._drake.on('out', this.dragOut.bind(this));
+                        this._drake.on('cancel', this.dragCancel.bind(this));
+                        this._drake.on('cloned', this.cloned.bind(this));
+                    },
+
+
+                    _polymerize: function() {
+                        var elements = [].slice.call(arguments);
+                        var features = [ 'fire', '_getEvent' ];
+                        elements.forEach(function(element) {
+                            if(!element || !(element instanceof Object)) { return true; }
+                            if(element.__drake_polymerized__) { return true; }
+                            features.forEach(function(f) {
+                                if(element[f] === undefined || element[f] === null) {
+                                    var v = Polymer.Base[f];
+                                    if(typeof(v) === 'function') { v = v.bind(element); }
+                                    element[f] = v;
+                                }
+                            });
+                            element.__drake_polymerized__ = true;
+                        });
+                    },
+                    /**
+                    * @param {Element} elements that we want to attach to
+                    */
+                    cloned: function(el, copy, source) {
+                        var data = { 'drake': this, 'element': el, 'copy': copy, 'source': source};
+                        this._polymerize(el, source);
+                        el.fire('cloned', data);
+                        if(source !== 'mirror' ) {
+                            source.fire('cloned', data);
+                            if(source.shadyParent) { source.shadyParent.fire('cloned', data); }
+                        }
+                    },
+                    dragging: function(el, source) {
+                        var data = { 'drake': this, 'element': el, 'source': source };
+                        this._polymerize(el, source);
+                        el.fire('drag', data);
+                        if(source instanceof Object) {
+                            source.fire('drag', data);
+                            if(source.shadyParent) {
+                                source.shadyParent.fire('drag', data);
+                            }
+                        }
+                    },
+
+                    dropped: function(el, target, source) {
+                        var data = { 'drake': this, 'element': el, 'target': target, 'source': source };
+                        this._polymerize(el, target, source);
+                        el.fire('drop', data);
+                        if(source instanceof Object) {
+                            if(source.shadyParent) {
+                                source.shadyParent.fire('drop', data);
+                            }
+                            else {
+                                source.fire('drop', data);
+                            }
+                        }
+                        if(target) {
+                            if(target.shadyParent) {
+                                target.shadyParent.fire('drop', data);
+                            }
+                            else {
+                                target.fire('drop', data);
+                            }
+                        }
+                        return true;
+                    },
+                    dragEnd: function(el) {
+                        this._polymerize(el);
+                        el.fire('drag-ended', { 'drake': this });
+                    },
+                    dragOut: function(el, lastDropTarget, source) {
+                        this._polymerize(el, source);
+                        var data = { 'drake': this, 'element': el, 'lastDropTarget': lastDropTarget, 'source': source };
+                        el.fire = ('fire' in el && el.fire) || Polymer.Base.fire;
+                        el.fire('drag-out', data);
+                        if(source instanceof Object) {
+                            source.fire('drag-out', data);
+                            if(source.shadyParent) {
+                                source.shadyParent.fire('drag-out', data);
+                            }
+                        }
+                    },
+                    dragCancel: function(el, source) {
+                        this._polymerize(el, source);
+                        var data = { 'drake': this,'element': el,  'source': source };
+                        el.fire('drag-canceled', data);
+                        if(source instanceof Object) {
+                            source.fire('drag-canceled', data);
+                            if(source.shadyParent) {
+                                source.shadyParent.fire('drag-canceled', data);
+                            }
+                        }
+                    },
+                    register: function(parent, el) {
+                        if(this._drake.containers.indexOf(el) < 0 ) {
+                            el.shadyParent = parent;
+                            this._drake.containers.push(el);
+                        }
+                    },
+                    unregister: function(el) {
+                        var idx = this._drake.containers.indexOf(el);
+                        if(idx >= 0) {
+                            this._drake.containers.splice(idx, 1);
+                        }
+                    }
+                });
+                </script>
+            </dom-module>

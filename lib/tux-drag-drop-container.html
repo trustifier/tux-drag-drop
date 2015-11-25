@@ -177,7 +177,9 @@ details.
         }
         if(this.dataOnly) {
             if(e.detail.source !== e.detail.target ) {
-                Polymer.dom(e.detail.target).removeChild(e.detail.element);
+                this.async(function() {
+                    Polymer.dom(e.detail.target).removeChild(e.detail.element);
+                });
             }
         }
       },
