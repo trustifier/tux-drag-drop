@@ -1,6 +1,6 @@
 {
   "name": "tux-drag-drop",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Polymer scaffolding for dragula drag-and-drop javascript library",
   "main": "tux-drag-drop.html",
   "dependencies": {},
