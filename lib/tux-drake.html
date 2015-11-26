@@ -120,6 +120,7 @@ details.
                         });
                         this._drake.on('drag', this.dragging.bind(this));
                         this._drake.on('drop', this.dropped.bind(this));
+                        this._drake.on('shadow', this.shadow.bind(this));
                         this._drake.on('dragend', this.dragEnd.bind(this));
                         this._drake.on('out', this.dragOut.bind(this));
                         this._drake.on('cancel', this.dragCancel.bind(this));
@@ -146,11 +147,16 @@ details.
                     /**
                     * @param {Element} elements that we want to attach to
                     */
+
+                    shadow: function(item, dropTarget) {
+                        var self = this;
+                    },
+
                     cloned: function(el, copy, source) {
                         var data = { 'drake': this, 'element': el, 'copy': copy, 'source': source};
                         this._polymerize(el, source);
                         el.fire('cloned', data);
-                        if(source !== 'mirror' ) {
+                        if(source !== 'mirror' && source !=='copy') {
                             source.fire('cloned', data);
                             if(source.shadyParent) { source.shadyParent.fire('cloned', data); }
                         }
