@@ -30,11 +30,11 @@
     "src"
   ],
   "dependencies": {
-    "dragula.js": "dragula#^3.1.0",
+    "dragula.js": "trustifier/dragula#develop",
     "polymer": "^1.1.2"
   },
   "devDependencies": {
-    "mat-elements": "ExpandJS/mat-elements#~0.9.8",
-    "xp-elements": "ExpandJS/xp-elements#~0.9.8"
+    "mat-elements": "ExpandJS/mat-elements#^0.9.11",
+    "xp-elements": "ExpandJS/xp-elements#^0.9.11"
   }
 }
